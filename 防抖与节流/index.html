@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="./2.防抖的立即执行.js"></script>
+    <input type="text">
+
+
+
+
+    <script>
+        const inputEl = document.querySelector('input');
+        const fn = function (event) {
+            console.log("触发了onchange事件", this, event);
+        }
+        inputEl.oninput = debounce(fn, 1000, true);
+        // inputEl.oninput = function (event) {
+        //     console.log("触发了onchange事件", this, event);
+        // }
+    </script>
+</body>
+
+</html>
