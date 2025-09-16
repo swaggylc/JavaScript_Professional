@@ -1,29 +1,31 @@
+/**
+ * 计算属性管理器类，用于处理Vue中的计算属性功能
+ */
 class Computed {
+  /**
+   * 构造函数，初始化计算属性数据存储数组
+   */
   constructor() {
     /**
-     *   computed: {
-            nameAge() {
-                console.log("nameAge 计算属性调用");
-                return this.name + this.age;
-            },
-        },
-
-        {
-            key：nameAge
-            value：计算出来的的值
-            get： nameAge Fn  依赖变化--> 执行get
-            dep：['name','age']
-        }
-
-
+     * 计算属性数据结构示例：
+     * {
+     *   key: 'nameAge',           // 计算属性名称
+     *   value: '张三18',           // 计算属性的值
+     *   get: nameAge函数,          // 计算属性的getter函数
+     *   dep: ['name', 'age']       // 计算属性依赖的响应式数据
+     * }
      */
-    //  每一个计算属性
+    // 存储所有计算属性的数据
     this.computedData = [];
   }
+  
   /**
-   * @description:
-   * @param {}
-   * @return {}
+   * 添加计算属性到Vue实例
+   * @description 将计算属性添加到Vue实例上，并设置响应式依赖关系
+   * @param {Object} vm - Vue实例对象
+   * @param {Object} computed - 包含所有计算属性的对象
+   * @param {string} key - 当前要添加的计算属性名称
+   * @return {void}
    */
   addComputed(vm, computed, key) {
     // 获取属性描述符
@@ -52,9 +54,11 @@ class Computed {
     });
   }
   /**
-   * @description:
-   * @param {}
-   * @return {}
+   * 解析计算属性函数中的依赖项
+   * @description 从函数源码中提取出所有使用的this.xxx形式的依赖属性
+   * @param {Function} fn - 计算属性的getter函数
+   * @return {Array<string>} 返回依赖的属性名数组
+   * @private
    */
   _getDep(fn) {
     // 解析计算属性的回调函数中用到的'this.xxx'
@@ -71,17 +75,25 @@ class Computed {
     });
   }
   /**
-   * @description:
-   * @param {}
-   * @return {}
+   * 将计算属性数据添加到内部存储
+   * @description 将计算属性的相关信息存储到computedData数组中
+   * @param {Object} computedDataIns - 计算属性数据对象
+   * @param {string} computedDataIns.key - 计算属性名称
+   * @param {*} computedDataIns.value - 计算属性的值
+   * @param {Function} computedDataIns.get - 计算属性的getter函数
+   * @param {Array<string>} computedDataIns.dep - 计算属性依赖的属性数组
+   * @return {void}
+   * @private
    */
   _addComputedData(computedDataIns) {
     this.computedData.push(computedDataIns);
   }
   /**
-   * @description:
-   * @param {}
-   * @return {}
+   * 更新依赖指定属性的所有计算属性
+   * @description 当响应式数据发生变化时，更新所有依赖该数据的计算属性
+   * @param {string} key - 发生变化的响应式属性名
+   * @param {Function} [callback] - 更新完成后的回调函数，接收(computedKey, computedValue)参数
+   * @return {void}
    */
   update(key, callback) {
     this.computedData.map((item) => {
