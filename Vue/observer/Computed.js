@@ -18,7 +18,7 @@ class Computed {
     // 存储所有计算属性的数据
     this.computedData = [];
   }
-  
+
   /**
    * 添加计算属性到Vue实例
    * @description 将计算属性添加到Vue实例上，并设置响应式依赖关系
@@ -92,7 +92,10 @@ class Computed {
    * 更新依赖指定属性的所有计算属性
    * @description 当响应式数据发生变化时，更新所有依赖该数据的计算属性
    * @param {string} key - 发生变化的响应式属性名
-   * @param {Function} [callback] - 更新完成后的回调函数，接收(computedKey, computedValue)参数
+   * @param {Function} [callback] - 更新完成后的回调函数，接收(computedKey, computedValue, oldValue)参数
+   * @param {string} callback.computedKey - 被更新的计算属性名
+   * @param {*} callback.computedValue - 计算属性的新值
+   * @param {*} callback.oldValue - 计算属性更新前的旧值
    * @return {void}
    */
   update(key, callback) {
@@ -100,8 +103,9 @@ class Computed {
       const _dep = item.dep;
       const _key = _dep.find((ele) => ele === key);
       if (_key) {
+        const oldVal = item.get();
         item.value = item.get();
-        callback && callback(item.key, item.value);
+        callback && callback(item.key, item.value, oldVal);
       }
     });
   }

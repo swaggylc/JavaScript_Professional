@@ -1,5 +1,6 @@
 import reactive from "./reactive";
 import Computed from "./computed";
+import Watcher from "./Watcher";
 
 class Vue {
   constructor(options) {
@@ -20,6 +21,7 @@ class Vue {
     const computedIns = this.initComputed(vm, computed);
     const watcherIns = this.initWatcher(vm, watch);
     this.$updateComputed = computedIns.update.bind(computedIns);
+    this.$watch = watcherIns.invoke.bind(watcherIns);
   }
   /**
    * @description: 初始化响应式数据
@@ -31,7 +33,9 @@ class Vue {
       vm,
       (key, val) => {},
       (key, newVal, oldVal) => {
-        this.$updateComputed(key);
+        if (newVal === oldVal) return;
+        this.$updateComputed(key, this.$watch);
+        this.$watch(key, newVal, oldVal);
       }
     );
   }
@@ -57,7 +61,13 @@ class Vue {
    * @param {*} watch 监听
    * @return {}
    */
-  initWatcher(vm, watch) {}
+  initWatcher(vm, watch) {
+    const watcherIns = new Watcher();
+    for (let key in watch) {
+      watcherIns.addWatcher(vm, watch, key);
+    }
+    return watcherIns;
+  }
 }
 
 export default Vue;
