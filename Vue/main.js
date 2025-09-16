@@ -12,6 +12,12 @@ const vueInstance = new Vue({
       console.log("nameAge 计算属性调用");
       return this.name + this.age;
     },
+    // nameAge: {
+    //   get() {
+    //     console.log("nameAge 计算属性调用");
+    //     return this.name + this.age;
+    //   },
+    // },
   },
   watch: {
     age(newVal, oldVal) {
@@ -24,14 +30,13 @@ const vueInstance = new Vue({
 });
 
 console.log("vue实例", vueInstance);
-// 应该只打印一次
+// 计算属性的回调应该只执行一次
 console.log("使用计算属性", vueInstance.nameAge);
 console.log("使用计算属性", vueInstance.nameAge);
 console.log("使用计算属性", vueInstance.nameAge);
 // 重新赋值
 vueInstance.name = "李四";
-vueInstance.age = 20;
-// 应该只打印一次
+// 计算属性的回调应该只执行一次
 console.log("使用计算属性", vueInstance.nameAge);
 console.log("使用计算属性", vueInstance.nameAge);
 console.log("使用计算属性", vueInstance.nameAge);
