@@ -1,4 +1,4 @@
-import { track, trigger } from "./effect.js";
+import { track, trigger, pauseTracking, resumeTracking } from "./effect.js";
 import { isObject, hasChange } from "./utils.js";
 import { reactive } from "./reactive.js";
 import { TrackOpTypes, TriggerOpTypes } from "./operations.js";
@@ -14,6 +14,18 @@ const arrayInstrumentations = {};
     if (result === -1 || result === false) {
       return Array.prototype[method].call(this[raw], ...args);
     }
+    return result;
+  };
+});
+
+["push", "pop", "shift", "unshift", "splice"].forEach((method) => {
+  arrayInstrumentations[method] = function (...args) {
+    // 暂停依赖收集
+    pauseTracking();
+    // 调用原始方法
+    const result = Array.prototype[method].call(this, ...args);
+    // 恢复依赖收集
+    resumeTracking();
     return result;
   };
 });
@@ -48,13 +60,28 @@ function set(target, key, value, receiver) {
     : TriggerOpTypes.ADD;
   // 旧值
   const oldVal = target[key];
+  const oldLength = Array.isArray(target) ? target.length : undefined;
   const result = Reflect.set(target, key, value, receiver);
   // 赋值失败直接返回,不执行后续逻辑
   if (!result) return result;
+  const newLength = Array.isArray(target) ? target.length : undefined;
   // 值有变化 || 新增属性
   if (hasChange(oldVal, value) || type === TriggerOpTypes.ADD) {
     // 派发更新
     trigger(target, type, key);
+    // 1.数组
+    // 2.数组长度有变化
+    if (Array.isArray(target) && oldLength !== newLength) {
+      // 3.不是显式设置length属性
+      if (key !== "length") {
+        trigger(target, TriggerOpTypes.SET, "length");
+      } else {
+        // 4.显式设置length属性   变大会成稀疏数组  变小需要删除后面的元素 6 ---> 3
+        for (let i = newLength; i < oldLength; i++) {
+          trigger(target, TriggerOpTypes.DELETE, i.toString());
+        }
+      }
+    }
   }
   return result;
 }
