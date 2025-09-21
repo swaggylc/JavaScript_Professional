@@ -3,9 +3,32 @@ import { isObject, hasChange } from "./utils.js";
 import { reactive } from "./reactive.js";
 import { TrackOpTypes, TriggerOpTypes } from "./operations.js";
 
+const raw = Symbol("RAW");
+
+const arrayInstrumentations = {};
+["includes", "indexOf", "lastIndexOf"].forEach((method) => {
+  arrayInstrumentations[method] = function (...args) {
+    //  1.正常查找是否存在
+    let result = Array.prototype[method].call(this, ...args);
+    //  2.找不到,在原始对象查找
+    if (result === -1 || result === false) {
+      return Array.prototype[method].call(this[raw], ...args);
+    }
+    return result;
+  };
+});
+
 function get(target, key, receiver) {
+  // 如果读的是特定属性,则返回原始对象
+  if (key === raw) {
+    return target;
+  }
   // 依赖收集
   track(target, TrackOpTypes.GET, key);
+  // 如果是自身的方法且是数组,则返回重写的数组的方法
+  if (arrayInstrumentations.hasOwnProperty(key) && Array.isArray(target)) {
+    return arrayInstrumentations[key];
+  }
   // 使用receiver可以解决this指向问题(computed)
   const result = Reflect.get(target, key, receiver);
   // 递归处理嵌套对象
