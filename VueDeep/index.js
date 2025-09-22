@@ -1,7 +1,8 @@
 // 测试代码
 import { reactive } from "./reactive.js";
 import { effect } from "./effect.js";
-import { lazy } from "react";
+import { ref } from "./ref.js";
+import { computed } from "./computed.js";
 
 // const obj = {};
 
@@ -19,10 +20,10 @@ import { lazy } from "react";
 
 // fn();
 
-const state = reactive({
-  a: 1,
-  b: 2,
-});
+// const state = reactive({
+//   a: 1,
+//   b: 2,
+// });
 
 // 添加属性,触发更新,但是没有收集length的依赖(隐式更改) 原理:
 // Object.defineProperty(arr, "length", {
@@ -36,16 +37,45 @@ const state = reactive({
 // arr.push("123");
 // console.log(arr);
 
-function fn() {
-  console.log("fn运行");
-  //   state.a;
-  for (const key in state) {
-  }
-}
+// function fn() {
+//   console.log("fn运行");
+//   //   state.a;
+//   for (const key in state) {
+//   }
+// }
 
-const effectFn = effect(fn, {
-  lazy: true,
+// const effectFn = effect(fn, {
+//   lazy: true,
+// });
+
+// effectFn();
+// state.e = 3;
+
+// ref示例
+// let count = ref(0);
+// effect(() => {
+//   console.log(count.value);
+// });
+// count.value++;
+
+// computed示例
+const state = reactive({
+  a: 1,
+  b: 2,
 });
 
-effectFn();
-state.e = 3;
+const sum = computed(() => {
+  console.log("computed运行");
+  return state.a + state.b;
+});
+
+console.log(sum.value);
+console.log(sum.value);
+
+state.a++;
+state.a++;
+state.a++;
+
+console.log(sum.value);
+console.log(sum.value);
+console.log(sum.value);
