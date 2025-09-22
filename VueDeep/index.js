@@ -1,5 +1,7 @@
 // 测试代码
 import { reactive } from "./reactive.js";
+import { effect } from "./effect.js";
+import { lazy } from "react";
 
 // const obj = {};
 
@@ -17,7 +19,10 @@ import { reactive } from "./reactive.js";
 
 // fn();
 
-const arr = reactive([1, 2, 3]);
+const state = reactive({
+  a: 1,
+  b: 2,
+});
 
 // 添加属性,触发更新,但是没有收集length的依赖(隐式更改) 原理:
 // Object.defineProperty(arr, "length", {
@@ -28,5 +33,19 @@ const arr = reactive([1, 2, 3]);
 
 // 此时会触发length的get 但这是多余的
 // 解决方案:  1.重写这些方法  2.在调用这些方法的期间,暂停依赖收集
-arr.push("123");
-console.log(arr);
+// arr.push("123");
+// console.log(arr);
+
+function fn() {
+  console.log("fn运行");
+  //   state.a;
+  for (const key in state) {
+  }
+}
+
+const effectFn = effect(fn, {
+  lazy: true,
+});
+
+effectFn();
+state.e = 3;
