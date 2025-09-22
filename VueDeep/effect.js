@@ -25,6 +25,7 @@ export function effect(fn, options = {}) {
     }
   };
   effectFn.deps = [];
+  effectFn.options = options;
   if (!options.lazy) {
     effectFn();
   }
@@ -75,10 +76,15 @@ export function track(target, type, key) {
 // 派发更新
 export function trigger(target, type, key) {
   const effectFns = getEffectFns(target, type, key);
+  if (!effectFns) return;
   for (const effectFn of effectFns) {
     // 避免触发当前正在运行的effect
     if (effectFn === activeEffect) continue;
-    effectFn();
+    if (effectFn.options.scheduler) {
+      effectFn.options.scheduler(effectFn);
+    } else {
+      effectFn();
+    }
   }
 }
 
